@@ -34,4 +34,97 @@ def test_create_choice():
     assert len(question.choices) == 1
     assert choice.text == 'a'
     assert not choice.is_correct
+
+###############################################################
+
+def test_create_question_with_invalid_points():
+    with pytest.raises(Exception):
+        Question(title='q1', points=0)
+    with pytest.raises(Exception):
+        Question(title='q1', points=101)
+    with pytest.raises(Exception):
+        Question(title='q1', points=-1)
+
+def test_add_multiple_choices():
+    question = Question(title='q1')
+    question.add_choice('choice1', False)
+    question.add_choice('choice2', True)
+    question.add_choice('choice3', False)
     
+    assert len(question.choices) == 3
+    assert question.choices[1].is_correct == True
+
+def test_add_choice_with_invalid_text():
+    question = Question(title='q1')
+    
+    with pytest.raises(Exception):
+        question.add_choice('', False)
+    with pytest.raises(Exception):
+        question.add_choice('a'*101, False)
+
+def test_remove_choice_by_id():
+    question = Question(title='q1')
+    question.add_choice('choice1', False)
+    choice2 = question.add_choice('choice2', True)
+    
+    question.remove_choice_by_id(choice2.id)
+    
+    assert len(question.choices) == 1
+    assert question.choices[0].text == 'choice1'
+
+def test_remove_choice_with_invalid_id():
+    question = Question(title='q1')
+    question.add_choice('choice1', False)
+    
+    with pytest.raises(Exception):
+        question.remove_choice_by_id(999)
+
+def test_remove_all_choices():
+    question = Question(title='q1')
+    question.add_choice('choice1', False)
+    question.add_choice('choice2', True)
+    question.add_choice('choice3', False)
+    
+    question.remove_all_choices()
+    
+    assert len(question.choices) == 0
+
+def test_set_correct_choices():
+    question = Question(title='q1')
+    choice1 = question.add_choice('choice1', False)
+    choice2 = question.add_choice('choice2', False)
+    choice3 = question.add_choice('choice3', False)
+    
+    question.set_correct_choices([choice1.id, choice3.id])
+    
+    assert question.choices[0].is_correct == True
+    assert question.choices[1].is_correct == False
+    assert question.choices[2].is_correct == True
+
+def test_correct_selected_choices_with_valid_selections():
+    question = Question(title='q1', max_selections=2)
+    choice1 = question.add_choice('choice1', True)
+    choice2 = question.add_choice('choice2', False)
+    choice3 = question.add_choice('choice3', True)
+    
+    correct_ids = question.correct_selected_choices([choice1.id, choice2.id])
+    
+    assert correct_ids == [choice1.id]
+
+def test_correct_selected_choices_exceeds_max_selections():
+    question = Question(title='q1', max_selections=1)
+    choice1 = question.add_choice('choice1', True)
+    choice2 = question.add_choice('choice2', True)
+    
+    with pytest.raises(Exception):
+        question.correct_selected_choices([choice1.id, choice2.id])
+
+def test_choice_ids_are_sequential():
+    question = Question(title='q1')
+    choice1 = question.add_choice('choice1', False)
+    choice2 = question.add_choice('choice2', False)
+    choice3 = question.add_choice('choice3', False)
+    
+    assert choice1.id == 1
+    assert choice2.id == 2
+    assert choice3.id == 3
