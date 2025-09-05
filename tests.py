@@ -128,3 +128,18 @@ def test_choice_ids_are_sequential():
     assert choice1.id == 1
     assert choice2.id == 2
     assert choice3.id == 3
+
+@pytest.fixture
+def question_with_choices():
+    question = Question(title='q1')
+    question.add_choice('a', False)
+    question.add_choice('b', True)
+    question.add_choice('c', False)
+    return question
+
+def test_question_has_three_choices(question_with_choices):
+    assert len(question_with_choices.choices) == 3
+
+def test_remove_choice_from_question(question_with_choices):
+    question_with_choices.remove_choice_by_id(1)
+    assert len(question_with_choices.choices) == 2
